@@ -39,19 +39,6 @@
 		    }
 		}
 		
-		public function index2(){
-		    $query = $this->JqModel->getAll();
-
-		    $array = array("a"=>"b", "c"=>"d", "e"=>"f");
-		    $match = "e";
-
-		    foreach($array as $key=>$value){
-		    	if($match == $key){
-		    		echo $value;
-		    	}
-		    }
-		}
-		
 		public function showData(){
 			$page = $_POST['page'];
 			$limit = $_POST['rows'];
@@ -137,11 +124,80 @@
 		}
 
 		public function showDataSub(){
-			$id = $this->input->get('id');
+			$id = $_GET['employee_id'];
+			$page = $_GET['page'];
+			$limit = $_GET['rows'];
+			$sidx = $_GET['sidx'];
+			$sord = $_GET['sord'];
 			
-			$query = $this->JqModel->getDataSub($id);
+			$start = $limit * $page - $limit;
+			$start = ($start < 0) ? 0 : $start;
+
+			$where = "";
+	 
+			if ($_GET['_search'] == 'true') {
+			    
+			    $searchField = $_GET['searchField'];
+			    $searchOper = $_GET['searchOper'];
+			    $searchString = $_GET['searchString'];
+			    
+				$ops = array(
+				'eq'=>'=',
+				'ne'=>'<>',
+				'lt'=>'<',
+				'le'=>'<=',
+				'gt'=>'>',
+				'ge'=>'>=',
+				'bw'=>'LIKE',
+				'bn'=>'NOT LIKE',
+				'in'=>'LIKE',
+				'ni'=>'NOT LIKE',
+				'ew'=>'LIKE',
+				'en'=>'NOT LIKE',
+				'cn'=>'LIKE',
+				'nc'=>'NOT LIKE'
+				);
+				
+				foreach($ops as $key=>$value){
+					if($searchOper == $key) {
+						$ops = $value;
+					}
+				}
+				
+				if($searchOper == 'eq' ) 
+					$searchString = $searchString;
+				if($searchOper == 'bw' || $searchOper == 'bn') 
+					$searchString .= '%';
+				if($searchOper == 'ew' || $searchOper == 'en' ) 
+					$searchString = '%'.$searchString;
+				if($searchOper == 'cn' || $searchOper == 'nc' || $searchOper == 'in' || $searchOper == 'ni') 
+					$searchString = '%'.$searchString.'%';
+	 
+				$where = "$searchField $ops '$searchString' ";
+			}
+			
+			if(!$sidx) $sidx = 1;
+			
+			$query2 = $this->JqModel->getCountSub($id);
+			
+			$count = ($query2);
+			
+			if($count > 0){
+				$pageTotal = ceil($count / $limit);
+			}
+			else{
+				$pageTotal = 0;
+			}
+			
+			if($page > $pageTotal) $page = $pageTotal;
+			
+			$query = $this->JqModel->getDataSub($start, $limit, $id, $sidx, $sord, $where);
 			
 			$data = new stdClass();
+			
+			$data->page = $page;
+			$data->total = $pageTotal;
+			$data->records = $count;
 			
 			$i = 0;
 			
@@ -175,7 +231,6 @@
 			$age = $this->input->post('age');
 			$phone_number = $this->input->post('phone_number');
 			$email = $this->input->post('email');
-			$attachments = $this->input->post('attachments');
 
 			switch($oper){
 				case 'add':
@@ -186,25 +241,49 @@
 					break;
 					
 				case 'edit':
+
 				    $data = array('name' => $name, 'age' => $age, 'phone_number' => $phone_number, 'email' => $email);
 					$this->JqModel->editData($id, $data);
 					
 					break;
 					
 				case 'del':
+
 					$this->JqModel->deleteData($id);
+					$this->JqModel->deleteDataChild($id);
 					
 					break;
 			}
 		}
-		
-		public function upload(){  
-		    foreach($_FILES["attachments"]["error"] as $key=>$error){
-		        if($error == UPLOAD_ERR_OK){
-		            $name = $_FILES["attachments"]["name"][$key];
-		            move_uploaded_file($_FILES["attachments"]["tmp_name"][$key], "E:\uploads" . $_FILES["attachments"]["name"][$key]);
-		        }
-		    }
+
+		public function crudDataSub() {
+			$oper = $this->input->get_post('oper');
+			$order_id = $this->input->get_post('id');
+			$employee_id = $this->input->get_post('employee_id');
+			$item_name = $this->input->get_post('item_name');
+			$order_date = $this->input->get_post('order_date');
+
+			switch($oper){
+				case 'add':
+				    
+				    $data = array('employee_id' => $employee_id, 'item_name' => $item_name, 'order_date' => $order_date);
+					$this->JqModel->insertDataSub($data);
+					
+					break;
+					
+				case 'edit':
+
+				    $data = array('item_name' => $item_name, 'order_date' => $order_date);
+					$this->JqModel->editDataSub($order_id, $data);
+					
+					break;
+					
+				case 'del':
+
+					$this->JqModel->deleteDataSub($order_id);
+					
+					break;
+			}
 		}
 		
 		public function importCsv(){    
@@ -261,7 +340,7 @@
 		}
 		
 		public function exportCsv(){
-		    $id = $this->input->get("id");
+		    $id = $_GET["id"];
 		    $query = $this->JqModel->export_csv($id);
 		    
 		    $i = 0;
@@ -343,6 +422,15 @@
 	        $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007'); 
 	 
 	        $objWriter->save('php://output');
+		}
+
+		public function upload(){  
+		    foreach($_FILES["attachments"]["error"] as $key=>$error){
+		        if($error == UPLOAD_ERR_OK){
+		            $name = $_FILES["attachments"]["name"][$key];
+		            move_uploaded_file($_FILES["attachments"]["tmp_name"][$key], "E:\uploads" . $_FILES["attachments"]["name"][$key]);
+		        }
+		    }
 		}
 	}
 ?>

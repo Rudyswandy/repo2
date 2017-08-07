@@ -77,14 +77,15 @@ body{
 					
 					var subgrid_table_id, pager_id;
 
+					console.log(row_id);
+
 					subgrid_table_id = subgrid_id + "_t";
 					pager_id = "p_" + subgrid_table_id;
 
 					$("#" + subgrid_id).html("<table id='" + subgrid_table_id + "' class='scroll'></table><div id='" + pager_id + "' class='scroll'></div>");
 
 					$("#" + subgrid_table_id).jqGrid({
-						url: "<?php echo base_url(); ?>index.php/JqController/showDataSub?" + "id=" + row_id,
-						mtype: "GET",
+						url: "<?php echo base_url(); ?>index.php/JqController/showDataSub?" + "employee_id=" + row_id,
 						datatype: "JSON",
 						colNames: ["Order ID", "Item Name", "Date of Order"],
 						colModel: [
@@ -97,8 +98,12 @@ body{
 						height: "auto",
 						pager: pager_id,
 						sortname: "order_id",
-						sortorder: "desc"
-					}).jqGrid('navGrid', "#" + pager_id, {search: false, view: true, edit: false, add: false, del: false})
+						sortorder: "desc",
+						rownumbers: true,
+						viewrecords: true,
+						gridview: true,
+						editurl: "<?php echo base_url(); ?>index.php/JqController/crudDataSub?" + "employee_id=" + row_id
+					}).jqGrid('navGrid', "#" + pager_id, {search: true, view: true, edit: true, add: true, del: true})
 				},
 
 				subGridRowColapsed: function(subgrid_id, row_id) {

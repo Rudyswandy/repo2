@@ -11,12 +11,14 @@
 			return $query->result();
 		}
 
-		public function getDataSub($id){
-			$this->db->select("order_id", "item_name", "order_date");
-			$this->db->from("employee_order");
+		public function getDataSub($start, $limit, $id, $sidx, $sord, $where){
+			$this->db->select("*");
+			$this->db->limit($limit);
 			$this->db->where("employee_id", $id);
+			if($where != "") $this->db->where($where);
+			$this->db->order_by($sidx, $sord);
 
-			$query = $this->db->get();
+			$query = $this->db->get("employee_order", $limit, $start);
 			
 			return $query->result();
 		}
@@ -82,6 +84,28 @@
 		public function deleteData($id){
 			$this->db->where("id", $id);
 			return $this->db->delete("employee");
+
+			$this->db->where("employee_id", $id);
+			return $this->db->delete("employee_order");
+		}
+
+		public function insertDataSub($data){
+			return $this->db->insert("employee_order", $data);
+		}
+		
+		public function editDataSub($id, $data){
+			$this->db->where("order_id", $id);
+			return $this->db->update("employee_order", $data);
+		}
+		
+		public function deleteDataSub($id){
+			$this->db->where("order_id", $id);
+			return $this->db->delete("employee_order");
+		}
+
+		public function deleteDataChild($id){
+			$this->db->where("employee_id", $id);
+			return $this->db->delete("employee_order");
 		}
 
 		public function getAll(){
