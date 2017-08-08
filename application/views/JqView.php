@@ -75,7 +75,7 @@ body{
 					// a method getRowData(row_id) - which returns associative array in type name-value
 					// here we can easy construct the flowing
 					
-					var subgrid_table_id, pager_id;
+					var subgrid_table_id, pager_id, lastSelection;
 
 					subgrid_table_id = subgrid_id + "_t";
 					pager_id = "p_" + subgrid_table_id;
@@ -87,7 +87,7 @@ body{
 						datatype: "JSON",
 						colNames: ["Order ID", "Item Name", "Date of Order"],
 						colModel: [
-							{name: "order_id", index: "order_id", key: true, width: 10, align: "center", editable: false},
+							{name: "id", index: "id", key: true, width: 10, align: "center", editable: false},
 							{name: "item_name", index: "item_name", width: 15, align: "center", editable: true},
 							{name: "order_date", index: "order_date", width: 10, align: "center", editable: true, editoptions: {
 						      		size: 10, maxlengh: 10,
@@ -106,6 +106,14 @@ body{
 						rownumbers: true,
 						viewrecords: true,
 						gridview: true,
+
+				        ondblClickRow: function (id) {
+			                if (id && id !== lastSelection) {
+			                    jQuery(this).jqGrid('restoreRow', lastSelection);
+			                    jQuery(this).jqGrid('editRow', id, true);
+			                    lastSelection = id;
+			                }
+			            },
 
 						editurl: "<?php echo base_url(); ?>index.php/JqController/crudDataSub?" + "employee_id=" + row_id
 					}).jqGrid('navGrid', "#" + pager_id, {search: true, view: true, edit: true, add: true, del: true})
