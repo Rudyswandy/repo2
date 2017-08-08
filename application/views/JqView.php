@@ -7,7 +7,7 @@
     <link type="text/css" href="<?php echo base_url()?>jqgrid/css/searchFilter.css" rel="stylesheet" />
 	
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.6/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" type="text/javascript"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="<?php echo base_url(); ?>jqgrid/js/jquery.jqGrid.js" type="text/javascript">
     </script>
@@ -77,8 +77,6 @@ body{
 					
 					var subgrid_table_id, pager_id;
 
-					console.log(row_id);
-
 					subgrid_table_id = subgrid_id + "_t";
 					pager_id = "p_" + subgrid_table_id;
 
@@ -91,7 +89,13 @@ body{
 						colModel: [
 							{name: "order_id", index: "order_id", key: true, width: 10, align: "center", editable: false},
 							{name: "item_name", index: "item_name", width: 15, align: "center", editable: true},
-							{name: "order_date", index: "order_date", width: 10, align: "center", editable: true},
+							{name: "order_date", index: "order_date", width: 10, align: "center", editable: true, editoptions: {
+						      		size: 10, maxlengh: 10,
+						      		dataInit: function(element) {
+						        		$(element).datepicker({dateFormat: 'yy-mm-dd'})
+						      		}
+						    	}
+							},
 						],				
 						rowNum: 10,
 						width: 1000,
@@ -102,6 +106,7 @@ body{
 						rownumbers: true,
 						viewrecords: true,
 						gridview: true,
+
 						editurl: "<?php echo base_url(); ?>index.php/JqController/crudDataSub?" + "employee_id=" + row_id
 					}).jqGrid('navGrid', "#" + pager_id, {search: true, view: true, edit: true, add: true, del: true})
 				},
